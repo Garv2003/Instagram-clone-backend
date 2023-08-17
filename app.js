@@ -9,7 +9,7 @@ require("dotenv").config();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: process.env.URL, credentials: true }));
 app.use(morgan("dev"));
 
 const postrouter=require('./routes/post');
@@ -21,7 +21,7 @@ app.use('/user',userrouter)
 app.use('/post',postrouter)
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/post")
+  .connect(process.env.MONGODB_URL)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`http://localhost:` + PORT);

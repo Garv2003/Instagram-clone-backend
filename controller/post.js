@@ -80,11 +80,11 @@ module.exports.getshowpost = (req, res) => {
 
 module.exports.addcomment = (req, res) => {
   const token = req.headers.authorization;
-  const detoken = jwt.verify(token, Jwt_secret);
+  // const detoken = jwt.verify(token, Jwt_secret);
   let id = req.body.id;
   const comment = {
     comment: req.body.text,
-    postedBy: detoken._id,
+    postedBy: token,
   };
   Posts.findByIdAndUpdate(
     { _id: id },

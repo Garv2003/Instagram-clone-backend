@@ -6,23 +6,16 @@ const Posts = require("../models/posts");
 const Users = require("../models/users");
 
 router.get("/explore",controller.getexplore);
-
 router.get("/", controller.gethome);
-
 router.get("/profile", controller.getprofile);
-
 router.get("/deletepost/:id",controller.getdeletepost);
-
-router.post("/deleteporfilephoto", controller.postdeleteprofilepost);
-
-router.post("/updatepost/:id", controller.updatepost);
-
 router.get("/showpost/:id",controller.getshowpost);
 
+router.post("/deleteporfilephoto", controller.postdeleteprofilepost);
+router.post("/updatepost/:id", controller.updatepost);
+
 router.put("/addcomment", controller.addcomment);
-
 router.put("/like",controller.postlike);
-
 router.put("/unlike",controller.postunlike);
 
 const cloudinary = require("cloudinary").v2;
@@ -67,7 +60,7 @@ router.post("/addpost", (req, res) => {
       newpost
         .save()
         .then(() => {
-          res.send({
+          res.status(200).json({
             title,
             ImageUrl: result.url,
             description,
@@ -78,7 +71,7 @@ router.post("/addpost", (req, res) => {
           });
         })
         .catch((err) => {
-          res.send(err);
+          res.status(404).json(err);
         });
     });
   });
@@ -94,10 +87,10 @@ router.post("/addprofilephoto", (req, res) => {
       }
     )
       .then((re) => {
-        res.send(re);
+        res.status(200).json(re);
       })
       .catch((err) => {
-        res.render(err);
+        res.status(404).json(err);
       });
   });
 });
