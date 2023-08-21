@@ -2,7 +2,8 @@ const Posts = require("../models/posts");
 const Users = require("../models/users");
 
 module.exports.getexplore = (req, res) => {
-  Posts.find({})
+  console.log(req.params)
+  Posts.find({User_id:{$ne:req.params.id}})
     .populate("User_id")
     .then((posts) => {
       res.send(posts);
@@ -10,7 +11,7 @@ module.exports.getexplore = (req, res) => {
 };
 
 module.exports.gethome = (req, res, next) => {
-  Posts.find({})
+  Posts.find({User_id:{$ne:req.params.id}})
     .populate("User_id")
     .populate("comments.postedBy")
     .then((posts) => {

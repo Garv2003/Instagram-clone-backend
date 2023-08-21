@@ -12,13 +12,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: process.env.URL, credentials: true }));
 app.use(morgan("dev"));
 
-const postrouter=require('./routes/post');
-const authrouter=require('./routes/auth')
-const userrouter=require('./routes/user')
+const postrouter = require("./routes/post");
+const authrouter = require("./routes/auth");
+const userrouter = require("./routes/user");
+const messageouter = require("./routes/message");
 
-app.use('/auth',authrouter)
-app.use('/user',userrouter)
-app.use('/post',postrouter)
+app.use("/auth", authrouter);
+app.use("/user", userrouter);
+app.use("/post", postrouter);
+app.use("/message", messageouter);
 
 mongoose
   .connect(process.env.MONGODB_URL)

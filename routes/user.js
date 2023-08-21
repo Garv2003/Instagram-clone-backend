@@ -7,7 +7,6 @@ router.get("/showprofile/:id", controller.showprofile);
 
 router.put("/follow",controller.userfollow);
 router.put("/unfollow",controller.userunfollow);
-
 router.get("/search",controller.getuser);
 
 module.exports = router;

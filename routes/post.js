@@ -5,8 +5,7 @@ const controller = require("../controller/post");
 const Posts = require("../models/posts");
 const Users = require("../models/users");
 
-router.get("/explore",controller.getexplore);
-router.get("/", controller.gethome);
+router.get("/explore/:id",controller.getexplore);
 router.get("/profile", controller.getprofile);
 router.get("/deletepost/:id",controller.getdeletepost);
 router.get("/showpost/:id",controller.getshowpost);
@@ -17,6 +16,8 @@ router.post("/updatepost/:id", controller.updatepost);
 router.put("/addcomment", controller.addcomment);
 router.put("/like",controller.postlike);
 router.put("/unlike",controller.postunlike);
+router.get("/:id", controller.gethome);
+
 
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");

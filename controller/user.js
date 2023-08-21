@@ -71,7 +71,7 @@ module.exports.userunfollow = (req, res) => {
 };
 
 module.exports.getuser = (req, res, next) => {
-  Users.find({username:{ $regex: req.query.user, $options: 'i' }})
+  Users.find({ username: { $regex: req.query.user, $options: "i" } })
     .then((user) => {
       res.status(200).json(user);
     })
