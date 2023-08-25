@@ -15,6 +15,12 @@ const postschema = new Schema({
       ref: "Users",
     },
   ],
+  bookmarks: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+    },
+  ],
   comments: [
     {
       comment: { type: String },

@@ -12,6 +12,7 @@ const userSchema = new Schema({
   token: String,
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: "Users" }],
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Users" }],
+  savedpost: [{ type: mongoose.Schema.Types.ObjectId, ref: "Posts" }],
 });
 
 module.exports = mongoose.model("Users", userSchema);

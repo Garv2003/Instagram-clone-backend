@@ -12,6 +12,9 @@ module.exports.getsuggestion = (req, res) => {
 };
 
 module.exports.showprofile = (req, res) => {
+  if (req.params.id == "undefined") {
+    res.send("user is not logged in please login");
+  }
   const { id } = req.params;
   Users.findById({ _id: id }).then((user) => {
     Posts.find({ User_id: id })
@@ -25,6 +28,9 @@ module.exports.showprofile = (req, res) => {
 };
 
 module.exports.userfollow = (req, res) => {
+  if(req.body.token == "undefined"){
+    res.send("user is not logged in please login");
+  }
   const token = req.body.token;
   Users.findByIdAndUpdate(
     { _id: req.body.followId },
@@ -48,6 +54,9 @@ module.exports.userfollow = (req, res) => {
 };
 
 module.exports.userunfollow = (req, res) => {
+  if(req.body.token == "undefined"){
+    res.send("user is not logged in please login");
+  }
   const token = req.body.token;
   Users.findByIdAndUpdate(
     { _id: req.body.followId },
@@ -71,6 +80,9 @@ module.exports.userunfollow = (req, res) => {
 };
 
 module.exports.getuser = (req, res, next) => {
+  if(req.query.user == "undefined"){
+    res.send("input is empty");
+  }
   Users.find({ username: { $regex: req.query.user, $options: "i" } })
     .then((user) => {
       res.status(200).json(user);

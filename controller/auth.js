@@ -4,6 +4,14 @@ const jwt = require("jsonwebtoken");
 const Jwt_secret = "mysecretkey";
 
 module.exports.postregister = async (req, res) => {
+  if (
+    !req.body.data.username ||
+    !req.body.data.password ||
+    !req.body.data.name ||
+    !req.body.data.email
+  ) {
+    return res.send({ error: "Please enter all the fields" });
+  }
   try {
     const { password } = req.body.data;
     const newUser = new Users({
@@ -28,6 +36,10 @@ module.exports.postregister = async (req, res) => {
 module.exports.postlogin = (req, res) => {
   const { username, password } = req.body;
   console.log(req.body);
+  if (!username || !password) {
+    return res.send({ error: "Please enter all the fields" });
+  }
+
   Users.findOne({ username: username })
     .then((user) => {
       if (!user) {

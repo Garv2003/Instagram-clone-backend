@@ -18,6 +18,8 @@ router.put("/like",controller.postlike);
 router.put("/unlike",controller.postunlike);
 router.get("/:id", controller.gethome);
 
+router.put("/bookmark", controller.savepost);
+router.put("/unbookmark", controller.unsavepost);
 
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
