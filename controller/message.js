@@ -12,20 +12,27 @@ module.exports.getMessages = async (req, res, next) => {
 
     res.json(messages);
   } catch (err) {
-    console.log(err);
-    res.json({ msg: "Failed to get messages" });
+    console.error(err);
+    res.status(500).json({ error: "Failed to get messages" });
   }
 };
 
 module.exports.addMessage = async (req, res, next) => {
-  // try {
-  const { from, to, message } = req.body;
-  const data = await Messages.create({
-    text: message,
-    users: [from, to],
-    senderId: from,
-  });
+  try {
+    const { from, to, message } = req.body;
+    const data = await Messages.create({
+      text: message,
+      users: [from, to],
+      senderId: from,
+    });
 
-  if (data) return res.json({ msg: "Message added successfully." });
-  else return res.json({ msg: "Failed to add message to the database" });
+    if (data) {
+      res.status(201).json({ success: true, message: "Message added successfully." });
+    } else {
+      res.status(500).json({ error: "Failed to add message to the database" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to add message" });
+  }
 };

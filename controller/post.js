@@ -2,209 +2,246 @@ const Posts = require("../models/posts");
 const Users = require("../models/users");
 
 module.exports.getexplore = (req, res) => {
-  if (req.params.id == "undefined") {
-    res.send("user is not logged in please login");
+  const { id } = req.params;
+  
+  if (id === "undefined") {
+    return res.status(400).json({ message: "User is not logged in, please login" });
   }
-  Posts.find({ User_id: { $ne: req.params.id } })
+  
+  Posts.find({ User_id: { $ne: id } })
     .populate("User_id")
     .then((posts) => {
-      res.send(posts);
+      res.json(posts);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
     });
 };
 
-module.exports.gethome = (req, res, next) => {
-  if (req.params.id == "undefined") {
-    res.send("user is not logged in please login");
+module.exports.gethome = (req, res) => {
+  const { id } = req.params;
+  
+  if (id === "undefined") {
+    return res.status(400).json({ message: "User is not logged in, please login" });
   }
 
-  Posts.find({ User_id: { $ne: req.params.id } })
+  Posts.find({ User_id: { $ne: id } })
     .populate("User_id")
     .populate("comments.postedBy")
     .then((posts) => {
-      res.send(posts);
+      res.json(posts);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
     });
 };
 
 module.exports.getprofile = (req, res) => {
   const token = req.headers.authorization;
-  // const detoken = jwt.verify(token, Jwt_secret)._id;
-  if (token == "undefined") {
-    res.send("user is not logged in please login");
+  
+  if (token === "undefined") {
+    return res.status(400).json({ message: "User is not logged in, please login" });
   }
 
-  Users.findById({ _id: token })
+  Users.findById(token)
     .populate("savedpost")
     .then((user) => {
       Posts.find({ User_id: token }).then((post) => {
-        res.send([user, post]);
+        res.json([user, post]);
       });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
     });
 };
 
-module.exports.getdeletepost = (req, res, next) => {
-  if (req.params.id == "undefined") {
-    res.send("error occur please try again");
-  }
+module.exports.getdeletepost = (req, res) => {
   const { id } = req.params;
+
+  if (id === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
+  }
+
   Posts.deleteOne({ _id: id })
-    .then((res) => {
-      res.send(res);
+    .then((result) => {
+      if (result.deletedCount === 1) {
+        res.json({ message: "true" });
+      } else {
+        res.json({ message: "false" });
+      }
     })
     .catch((err) => {
-      res.send("False");
+      res.status(500).json({ message: "Internal server error" });
     });
 };
 
 module.exports.postdeleteprofilepost = (req, res) => {
-  if (req.body.id == "undefined") {
-    res.send("error occur please try again");
+  const { id } = req.body;
+
+  if (id === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
   }
-  Users.findByIdAndUpdate(
-    { _id: req.body.id },
-    {
-      profileImage: "",
-    }
-  ).then((d) => {
-    res.send(d);
-  });
+
+  Users.findByIdAndUpdate(id, {
+    profileImage: "",
+  })
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
+    });
 };
 
 module.exports.updatepost = (req, res) => {
-  if (req.params.id == "undefined") {
-    res.send("error occur please try again");
-  }
   const { id } = req.params;
-  Posts.findByIdAndUpdate(
-    { _id: id },
-    {
-      title: req.body.title,
-      description: req.body.description,
-      ImageUrl: req.body.ImageUrl,
-    }
-  )
-    .then((d) => {
-      res.send("true");
+
+  if (id === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
+  }
+
+  Posts.findByIdAndUpdate(id, {
+    title: req.body.title,
+    description: req.body.description,
+    ImageUrl: req.body.ImageUrl,
+  })
+    .then((result) => {
+      res.json({ message: "true" });
     })
     .catch((err) => {
-      res.send("false");
+      res.json({ message: "false" });
     });
 };
 
 module.exports.getshowpost = (req, res) => {
-  if (req.params.id == "undefined") {
-    res.send("error occur please try again");
-  }
   const { id } = req.params;
+
+  if (id === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
+  }
+
   Posts.findOne({ _id: id })
     .populate("User_id")
     .then((post) => {
-      res.status(200).json({ post });
+      if (post) {
+        res.status(200).json({ post });
+      } else {
+        res.status(404).json({ message: "Post not found" });
+      }
     })
     .catch((err) => {
-      res.status(404).json(err);
+      res.status(500).json({ message: "Internal server error" });
     });
 };
 
 module.exports.addcomment = (req, res) => {
   const token = req.headers.authorization;
-  // const detoken = jwt.verify(token, Jwt_secret);
-  if (token == "undefined" || req.body.id == "undefined") {
-    res.send("error occur please try again");
+  const { id } = req.body;
+
+  if (token === "undefined" || id === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
   }
-  let id = req.body.id;
+
   const comment = {
     comment: req.body.text,
     postedBy: token,
   };
-  Posts.findByIdAndUpdate(
-    { _id: id },
-    {
-      $push: { comments: comment },
-    }
-  ).then((d) => {
-    res.send(d);
-  });
+
+  Posts.findByIdAndUpdate(id, {
+    $push: { comments: comment },
+  })
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
+    });
 };
 
 module.exports.postlike = (req, res) => {
-  if (req.body.id == "undefined" || req.body.postid == "undefined") {
-    res.send("error occur please try again");
+  const { id, postid } = req.body;
+
+  if (id === "undefined" || postid === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
   }
 
-  const token = req.body.id;
-  const id = req.body.postid;
-  if (id != undefined) {
-    Posts.findByIdAndUpdate(
-      { _id: id },
-      {
-        $push: { likes: token },
-      }
-    ).then((d) => {
-      res.send(d);
+  Posts.findByIdAndUpdate(postid, {
+    $push: { likes: id },
+  })
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
     });
-  }
 };
 
 module.exports.postunlike = (req, res) => {
-  if (req.body.id == "undefined" || req.body.postid == "undefined") {
-    res.send("error occur please try again");
+  const { id, postid } = req.body;
+
+  if (id === "undefined" || postid === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
   }
 
-  const id = req.body.postid;
-  const token = req.body.id;
-  console.log(id);
-  if (id != undefined) {
-    Posts.findByIdAndUpdate(
-      { _id: id },
-      {
-        $pull: { likes: token },
-      }
-    ).then((d) => {
-      res.send(d);
+  Posts.findByIdAndUpdate(postid, {
+    $pull: { likes: id },
+  })
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
     });
-  }
 };
 
 module.exports.savepost = (req, res) => {
-  if (req.body.id == "undefined" || req.body.postid == "undefined") {
-    res.send("error occur please try again");
+  const { id, postid } = req.body;
+
+  if (id === "undefined" || postid === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
   }
-  Posts.findByIdAndUpdate(
-    { _id: req.body.postid },
-    {
-      $push: { bookmarks: req.body.id },
-    }
-  ).then((d) => {
-    Users.findByIdAndUpdate(
-      { _id: req.body.id },
-      {
-        $push: { savedpost: req.body.postid },
-      }
-    ).then((d) => {
-      res.send(d);
+
+  Posts.findByIdAndUpdate(postid, {
+    $push: { bookmarks: id },
+  })
+    .then((result) => {
+      Users.findByIdAndUpdate(id, {
+        $push: { savedpost: postid },
+      })
+        .then((userResult) => {
+          res.json(userResult);
+        })
+        .catch((err) => {
+          res.status(500).json({ message: "Internal server error" });
+        });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
     });
-  });
 };
 
 module.exports.unsavepost = (req, res) => {
-  if (req.body.id == "undefined" || req.body.postid == "undefined") {
-    res.send("error occur please try again");
+  const { id, postid } = req.body;
+
+  if (id === "undefined" || postid === "undefined") {
+    return res.status(400).json({ message: "Error occurred, please try again" });
   }
 
-  Posts.findByIdAndUpdate(
-    { _id: req.body.postid },
-    {
-      $pull: { bookmarks: req.body.id },
-    }
-  ).then((d) => {
-    Users.findByIdAndUpdate(
-      { _id: req.body.id },
-      {
-        $pull: { savedpost: req.body.postid },
-      }
-    ).then((d) => {
-      res.send(d);
+  Posts.findByIdAndUpdate(postid, {
+    $pull: { bookmarks: id },
+  })
+    .then((result) => {
+      Users.findByIdAndUpdate(id, {
+        $pull: { savedpost: postid },
+      })
+        .then((userResult) => {
+          res.json(userResult);
+        })
+        .catch((err) => {
+          res.status(500).json({ message: "Internal server error" });
+        });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
     });
-  });
 };
-
