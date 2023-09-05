@@ -11,13 +11,6 @@ module.exports.getMessages = async (req, res, next) => {
     }).sort({ updatedAt: 1 });
 
     res.json(messages);
-    // const projectedMessages = messages.map((msg) => {
-    //   return {
-    //     fromSelf: msg.sender.toString() === from,
-    //     message: msg.message.text,
-    //   };
-    // });
-    // res.json(projectedMessages);
   } catch (err) {
     console.log(err);
     res.json({ msg: "Failed to get messages" });

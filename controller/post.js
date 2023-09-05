@@ -98,8 +98,10 @@ module.exports.getshowpost = (req, res) => {
   Posts.findOne({ _id: id })
     .populate("User_id")
     .then((post) => {
-      // console.log(post);
-      res.send({ post });
+      res.status(200).json({ post });
+    })
+    .catch((err) => {
+      res.status(404).json(err);
     });
 };
 
@@ -205,3 +207,4 @@ module.exports.unsavepost = (req, res) => {
     });
   });
 };
+
