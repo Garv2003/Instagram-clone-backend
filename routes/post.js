@@ -15,7 +15,7 @@ router.post("/updatepost/:id", controller.updatepost);
 router.post("/addpost",imageupload.uploadimage,controllerimage.getimage);
 router.post("/addprofilephoto",imageupload.uploadimage,controllerimage.postprofile);
 
-router.put("/addcomment", controller.addcomment);
+router.post("/addcomment", controller.addcomment);
 router.put("/like",controller.postlike);
 router.put("/unlike",controller.postunlike);
 router.get("/:id", controller.gethome);

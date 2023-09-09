@@ -1,5 +1,5 @@
-const Posts = require("../models/posts");
-const Users = require("../models/users");
+const Posts = require("../models/post");
+const Users = require("../models/user");
 const cloudinary = require("cloudinary").v2;
 const path = require("path");
 

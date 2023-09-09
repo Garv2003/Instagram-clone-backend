@@ -6,25 +6,28 @@ const postschema = new Schema({
   ImageUrl: String,
   description: String,
   User_id: {
-    type: Schema.Types.ObjectId,
-    ref: "Users",
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
+      ref: "User",
+      required: true,
     },
   ],
   bookmarks: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
+      ref: "User",
+      required: true,
     },
   ],
   comments: [
     {
-      comment: { type: String },
-      postedBy: { type: mongoose.Schema.Types.ObjectId ,ref:"Users"},
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
     },
   ],
   date: {
@@ -33,4 +36,4 @@ const postschema = new Schema({
   },
 });
 
-module.exports = mongoose.model("Posts", postschema);
+module.exports = mongoose.model("Post", postschema);

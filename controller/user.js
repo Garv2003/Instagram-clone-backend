@@ -1,5 +1,5 @@
-const Users = require("../models/users");
-const Posts = require("../models/posts");
+const Users = require("../models/user");
+const Posts = require("../models/post");
 
 module.exports.getsuggestion = (req, res) => {
   Users.find({})
