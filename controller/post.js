@@ -125,8 +125,7 @@ module.exports.getshowpost = async (req, res) => {
         },
       });
     if (post) {
-      console.log(post);
-      res.status(200).json({ post });
+      res.status(200).json(post);
     } else {
       res.status(404).json({ message: "Post not found" });
     }
