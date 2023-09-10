@@ -43,17 +43,22 @@ module.exports.postlogin = (req, res) => {
   Users.findOne({ username: username })
     .then((user) => {
       if (!user) {
-        return res.send({ error: "Invalid email" });
+        return res.send({ msg: "User Not Found" ,success:false});
       }
       bcrypt.compare(password, user.password).then(function (result) {
         if (result) {
           const token = jwt.sign({ _id: user._id }, Jwt_secret);
           const { _id, name, email, userName } = user;
-          res.send({ token, user: { _id, name, email, userName } });
+          res.send({
+            token,
+            user: { _id, name, email, userName },
+            msg: "Login successful",
+            success: true,
+          });
 
           console.log({ token, user: { _id, name, email, userName } });
         } else {
-          return res.send({ error: "Invalid password" });
+          return res.send({ msg: "Invalid password", success: false });
         }
       });
     })
