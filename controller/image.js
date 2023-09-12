@@ -12,17 +12,16 @@ cloudinary.config({
 module.exports.getimage = async (req, res) => {
   try {
     const { title, description } = req.body;
-    const token = req.headers.authorization;
 
     const uploadResponse = await cloudinary.uploader.upload(req.file.path);
 
-    const user = await Users.findOne({ _id: token });
+    const user = await Users.findOne({ _id: req.user });
 
     const newpost = new Posts({
       title,
       ImageUrl: uploadResponse.url,
       description,
-      User_id: token,
+      User_id: req.user,
     });
 
     await newpost.save();
