@@ -2,50 +2,29 @@ const Post = require("../models/post");
 const User = require("../models/user");
 const Comment = require("../models/comment");
 
-function sendErrorResponse(res, message) {
-  return res.status(400).json({ message });
-}
+// module.exports.getexplore = (req, res) => {
+//   const { id } = req.params;
 
-function checkLoggedIn(req, res) {
-  const token = req.headers.authorization;
+//   if (id === "undefined") {
+//     return res
+//       .status(400)
+//       .json({ message: "User is not logged in, please login" });
+//   }
 
-  if (token === "undefined") {
-    return sendErrorResponse(res, "User is not logged in, please login");
-  }
-
-  return token;
-}
-
-module.exports.getexplore = (req, res) => {
-  const { id } = req.params;
-
-  if (id === "undefined") {
-    return res
-      .status(400)
-      .json({ message: "User is not logged in, please login" });
-  }
-
-  Post.find({ User_id: { $ne: id } })
-    .populate("User_id")
-    .sort({ createdAt: -1 })
-    .then((posts) => {
-      res.json(posts);
-    })
-    .catch((err) => {
-      res.status(500).json({ message: "Internal server error" });
-    });
-};
+//   Post.find({ User_id: { $ne: id } })
+//     .populate("User_id")
+//     .sort({ createdAt: -1 })
+//     .then((posts) => {
+//       res.json(posts);
+//     })
+//     .catch((err) => {
+//       res.status(500).json({ message: "Internal server error" });
+//     });
+// };
 
 module.exports.gethome = (req, res) => {
-  const { id } = req.params;
 
-  if (id === "undefined") {
-    return res
-      .status(400)
-      .json({ message: "User is not logged in, please login" });
-  }
-
-  Post.find({ User_id: { $ne: id } })
+  Post.find({ User_id: { $ne: req.user } })
     .populate("User_id")
     .sort({ createdAt: -1 })
     .then((posts) => {
@@ -57,11 +36,10 @@ module.exports.gethome = (req, res) => {
 };
 
 module.exports.getprofile = async (req, res) => {
-  const token = checkLoggedIn(req, res);
 
   try {
-    const user = await User.findById(token).populate("savedpost");
-    const post = await Post.find({ User_id: token });
+    const user = await User.findById(req.user).populate("savedpost");
+    const post = await Post.find({ User_id: req.user });
     res.json([user, post]);
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
@@ -70,7 +48,6 @@ module.exports.getprofile = async (req, res) => {
 
 module.exports.getdeletepost = async (req, res) => {
   const { id } = req.params;
-
   try {
     const result = await Post.deleteOne({ _id: id });
 
@@ -136,12 +113,10 @@ module.exports.getshowpost = async (req, res) => {
 };
 
 module.exports.addcomment = async (req, res) => {
-  const token = checkLoggedIn(req, res);
-  console.log(req.body);
   try {
     const comment = await Comment.create({
       text: req.body.text,
-      postedby: req.body.user_id,
+      postedby: req.user,
     });
     console.log(comment);
     await Post.findByIdAndUpdate(req.body.postid, {
@@ -155,11 +130,11 @@ module.exports.addcomment = async (req, res) => {
 };
 
 module.exports.postlike = async (req, res) => {
-  const { id, postid } = req.body;
+  const { postid } = req.body;
 
   try {
     const result = await Post.findByIdAndUpdate(postid, {
-      $push: { likes: id },
+      $push: { likes: req.user },
     });
 
     res.json(result);
@@ -169,11 +144,11 @@ module.exports.postlike = async (req, res) => {
 };
 
 module.exports.postunlike = async (req, res) => {
-  const { id, postid } = req.body;
+  const { postid } = req.body;
 
   try {
     const result = await Post.findByIdAndUpdate(postid, {
-      $pull: { likes: id },
+      $pull: { likes: req.user },
     });
 
     res.json(result);
@@ -183,14 +158,14 @@ module.exports.postunlike = async (req, res) => {
 };
 
 module.exports.savepost = async (req, res) => {
-  const { id, postid } = req.body;
+  const { postid } = req.body;
 
   try {
     const postResult = await Post.findByIdAndUpdate(postid, {
-      $push: { bookmarks: id },
+      $push: { bookmarks: req.user },
     });
 
-    const userResult = await User.findByIdAndUpdate(id, {
+    const userResult = await User.findByIdAndUpdate(req.user, {
       $push: { savedpost: postid },
     });
 
@@ -201,14 +176,14 @@ module.exports.savepost = async (req, res) => {
 };
 
 module.exports.unsavepost = async (req, res) => {
-  const { id, postid } = req.body;
+  const { postid } = req.body;
 
   try {
     const postResult = await Post.findByIdAndUpdate(postid, {
-      $pull: { bookmarks: id },
+      $pull: { bookmarks: req.user },
     });
 
-    const userResult = await User.findByIdAndUpdate(id, {
+    const userResult = await User.findByIdAndUpdate(req.user, {
       $pull: { savedpost: postid },
     });
 

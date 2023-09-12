@@ -28,18 +28,14 @@ module.exports.showprofile = (req, res) => {
 };
 
 module.exports.userfollow = (req, res) => {
-  if (!req.body.token) {
-    res.send("User is not logged in, please login");
-  }
-  const token = req.body.token;
   Users.findByIdAndUpdate(
     { _id: req.body.followId },
     {
-      $push: { followers: token },
+      $push: { followers: req.user },
     }
   ).then((result1) => {
     Users.findByIdAndUpdate(
-      { _id: token },
+      { _id: req.user },
       {
         $push: { following: req.body.followId },
       }
@@ -54,18 +50,14 @@ module.exports.userfollow = (req, res) => {
 };
 
 module.exports.userunfollow = (req, res) => {
-  if (!req.body.token) {
-    res.send("User is not logged in, please login");
-  }
-  const token = req.body.token;
   Users.findByIdAndUpdate(
     { _id: req.body.followId },
     {
-      $pull: { followers: token },
+      $pull: { followers: req.user },
     }
   ).then((result1) => {
     Users.findByIdAndUpdate(
-      { _id: token },
+      { _id: req.user },
       {
         $pull: { following: req.body.followId },
       }

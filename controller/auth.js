@@ -43,24 +43,42 @@ module.exports.postlogin = (req, res) => {
   Users.findOne({ username: username })
     .then((user) => {
       if (!user) {
-        return res.send({ msg: "User Not Found" ,success:false});
+        return res.send({ msg: "User Not Found", success: false });
       }
       bcrypt.compare(password, user.password).then(function (result) {
         if (result) {
           const token = jwt.sign({ _id: user._id }, Jwt_secret);
           const { _id, name, email, userName } = user;
+          console.log(token);
           res.send({
             token,
             user: { _id, name, email, userName },
             msg: "Login successful",
             success: true,
           });
-
-          console.log({ token, user: { _id, name, email, userName } });
         } else {
           return res.send({ msg: "Invalid password", success: false });
         }
       });
     })
     .catch((err) => console.log(err));
+};
+
+module.exports.getuser = (req, res) => {
+  const token = req.header("Authorization");
+  if (!token) return res.send("false");
+  try {
+    const verified = jwt.verify(token, Jwt_secret);
+    if (!verified) return res.send(false);
+    Users.findById(verified._id)
+      .populate("followers", "_id name username")
+      .populate("following", "_id name username")
+      .populate("savedpost", "_id name username profileImage")
+      .select("-password")
+      .then((user) => {
+        res.send(user);
+      });
+  } catch (err) {
+    res.send(false);
+  }
 };
