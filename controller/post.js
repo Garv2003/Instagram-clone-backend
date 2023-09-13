@@ -2,27 +2,7 @@ const Post = require("../models/post");
 const User = require("../models/user");
 const Comment = require("../models/comment");
 
-// module.exports.getexplore = (req, res) => {
-//   const { id } = req.params;
-
-//   if (id === "undefined") {
-//     return res
-//       .status(400)
-//       .json({ message: "User is not logged in, please login" });
-//   }
-
-//   Post.find({ User_id: { $ne: id } })
-//     .populate("User_id")
-//     .sort({ createdAt: -1 })
-//     .then((posts) => {
-//       res.json(posts);
-//     })
-//     .catch((err) => {
-//       res.status(500).json({ message: "Internal server error" });
-//     });
-// };
-
-module.exports.gethome = (req, res) => {
+module.exports.getexplore = (req, res) => {
 
   Post.find({ User_id: { $ne: req.user } })
     .populate("User_id")
@@ -35,8 +15,27 @@ module.exports.gethome = (req, res) => {
     });
 };
 
-module.exports.getprofile = async (req, res) => {
+module.exports.gethome = async (req, res) => {
+  const {skip , limit} = req.query;
+  
+  const total = await Post.find({
+    User_id: { $ne: req.user },
+  }).countDocuments();
 
+  await Post.find({ User_id: { $ne: req.user } })
+    .limit(limit)
+    .skip(skip)
+    .populate("User_id")
+    .sort({ createdAt: -1 })
+    .then((posts) => {
+      res.json({ posts: posts, total: total });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
+    });
+};
+
+module.exports.getprofile = async (req, res) => {
   try {
     const user = await User.findById(req.user).populate("savedpost");
     const post = await Post.find({ User_id: req.user });
@@ -62,10 +61,9 @@ module.exports.getdeletepost = async (req, res) => {
 };
 
 module.exports.postdeleteprofilepost = async (req, res) => {
-  const { id } = req.body;
-
+  console.log(req.user);
   try {
-    const result = await User.findByIdAndUpdate(id, { profileImage: "" });
+    const result = await User.findByIdAndUpdate(req.user, { profileImage: "" });
     res.json(result);
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });

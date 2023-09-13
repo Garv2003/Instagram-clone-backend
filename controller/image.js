@@ -41,14 +41,12 @@ module.exports.getimage = async (req, res) => {
   }
 };
 
-module.exports.postprofile = async (req, res) => {
+module.exports.postprofile = async (req, res, next) => {
   try {
-    const token = req.body.id;
-
     const uploadResponse = await cloudinary.uploader.upload(req.file.path);
 
     await Users.findByIdAndUpdate(
-      { _id: token },
+      { _id: req.user },
       {
         profileImage: uploadResponse.url,
       }

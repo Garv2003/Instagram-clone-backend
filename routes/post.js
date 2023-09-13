@@ -2,27 +2,35 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controller/post");
 const controllerimage = require("../controller/image");
-const imageupload = require("../middlewares/setupmulter");
+const { upload } = require("../middlewares/setupmulter");
 const fetchuser = require("../middlewares/fetchuser");
+const path = require("path");
 
-// router.get("/explore/:id",controller.getexplore);
-router.get("/profile", fetchuser, controller.getprofile);
+router.get("/explore",fetchuser,controller.getexplore);
+
 router.delete("/deletepost/:id", fetchuser, controller.getdeletepost);
-router.get("/showpost/:id", fetchuser, controller.getshowpost);
 
-router.post("/deleteporfilephoto", fetchuser, controller.postdeleteprofilepost);
+router.delete(
+  "/deleteprofilephoto",
+  fetchuser,
+  controller.postdeleteprofilepost
+);
+
+router.get("/showpost/:id", fetchuser, controller.getshowpost);
+router.get("/profile", fetchuser, controller.getprofile);
 router.post("/updatepost/:id", fetchuser, controller.updatepost);
 
 router.post(
   "/addpost",
   fetchuser,
-  imageupload.uploadimage,
+  upload.single("ImageUrl"),
   controllerimage.getimage
 );
+
 router.post(
   "/addprofilephoto",
-    fetchuser,
-  imageupload.uploadimage,
+  fetchuser,
+  upload.single("ImageUrl"),
   controllerimage.postprofile
 );
 
