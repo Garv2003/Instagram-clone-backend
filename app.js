@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const app = express();
 const morgan = require("morgan");
 const helmet = require("helmet");
-const comression = require("compression");
+const compression = require("compression");
 const PORT = process.env.PORT || 3456;
 
 require("dotenv").config();
@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: process.env.URL, credentials: true }));
 app.use(morgan("dev"));
-app.use(comression());
+app.use(compression());
 app.use(helmet());
 
 const postrouter = require("./routes/post");
@@ -27,7 +27,10 @@ app.use("/post", postrouter);
 app.use("/message", messageouter);
 
 mongoose
-  .connect(process.env.MONGODB_URL)
+  .connect(process.env.MONGODB_URL,{
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     app.listen(PORT, () => {
       console.log(`http://localhost:` + PORT);

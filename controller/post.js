@@ -1,9 +1,9 @@
 const Post = require("../models/post");
 const User = require("../models/user");
 const Comment = require("../models/comment");
+const router = require("../routes/post");
 
 module.exports.getexplore = (req, res) => {
-
   Post.find({ User_id: { $ne: req.user } })
     .populate("User_id")
     .sort({ createdAt: -1 })
@@ -16,8 +16,8 @@ module.exports.getexplore = (req, res) => {
 };
 
 module.exports.gethome = async (req, res) => {
-  const {skip , limit} = req.query;
-  
+  const { skip, limit } = req.query;
+
   const total = await Post.find({
     User_id: { $ne: req.user },
   }).countDocuments();
@@ -125,6 +125,50 @@ module.exports.addcomment = async (req, res) => {
   } catch (err) {
     res.json({ message: "false" });
   }
+};
+
+module.exports.addreply = async (req, res) => {
+  const { commentid, text } = req.body;
+
+  try {
+    const reply = await Comment.create({
+      text: text,
+      postedby: req.user,
+    });
+    Comment.findByIdAndUpdate(commentid, {
+      $push: { replies: reply._id },
+    });
+
+    res.json({ message: "true", reply: reply });
+  } catch (err) {
+    res.json({ message: "false" });
+  }
+};
+
+module.exports.commentlike = async (req, res) => {
+  const { commentid } = req.body;
+  Comment.findByIdAndUpdate(commentid, {
+    $push: { likes: req.user },
+  })
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((err) => {
+      res.json({ message: "false" });
+    });
+};
+
+module.exports.commentunlike = async (req, res) => {
+  const { commentid } = req.body;
+  Comment.findByIdAndUpdate(commentid, {
+    $pull: { likes: req.user },
+  })
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((err) => {
+      res.json({ message: "false" });
+    });
 };
 
 module.exports.postlike = async (req, res) => {

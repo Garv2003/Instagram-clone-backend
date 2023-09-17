@@ -49,8 +49,7 @@ module.exports.postlogin = (req, res) => {
         if (result) {
           const token = jwt.sign({ _id: user._id }, Jwt_secret);
           const { _id, name, email, userName } = user;
-          console.log(token);
-          res.send({
+          res.status(200).json({
             token,
             user: { _id, name, email, userName },
             msg: "Login successful",

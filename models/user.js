@@ -13,6 +13,7 @@ const userSchema = new Schema({
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   savedpost: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+  createAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("User", userSchema);

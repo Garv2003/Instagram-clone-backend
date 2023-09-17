@@ -42,4 +42,9 @@ router.get("/", fetchuser, controller.gethome);
 router.put("/bookmark", fetchuser, controller.savepost);
 router.put("/unbookmark", fetchuser, controller.unsavepost);
 
+router.put("/commentreply", fetchuser, controller.addreply);
+router.put("/commentlike", fetchuser, controller.commentlike);
+router.put("/commentunlike", fetchuser, controller.commentunlike);
+
+
 module.exports = router;
