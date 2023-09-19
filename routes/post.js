@@ -7,23 +7,24 @@ const fetchuser = require("../middlewares/fetchuser");
 const path = require("path");
 
 router.get("/explore",fetchuser,controller.getexplore);
+router.get("/showpost/:id", fetchuser, controller.getshowpost);
+router.get("/profile", fetchuser, controller.getprofile);
+router.get("/", fetchuser, controller.gethome);
 
 router.delete("/deletepost/:id", fetchuser, controller.getdeletepost);
-
 router.delete(
   "/deleteprofilephoto",
   fetchuser,
   controller.postdeleteprofilepost
 );
+router.delete("/deletecomment/:id", fetchuser, controller.deletecomment); 
 
-router.get("/showpost/:id", fetchuser, controller.getshowpost);
-router.get("/profile", fetchuser, controller.getprofile);
 router.post("/updatepost/:id", fetchuser, controller.updatepost);
 
 router.post(
   "/addpost",
   fetchuser,
-  upload.single("ImageUrl"),
+  upload.single("file"),
   controllerimage.getimage
 );
 
@@ -37,11 +38,8 @@ router.post(
 router.post("/addcomment", fetchuser, controller.addcomment);
 router.put("/like", fetchuser, controller.postlike);
 router.put("/unlike", fetchuser, controller.postunlike);
-router.get("/", fetchuser, controller.gethome);
-
 router.put("/bookmark", fetchuser, controller.savepost);
 router.put("/unbookmark", fetchuser, controller.unsavepost);
-
 router.put("/commentreply", fetchuser, controller.addreply);
 router.put("/commentlike", fetchuser, controller.commentlike);
 router.put("/commentunlike", fetchuser, controller.commentunlike);

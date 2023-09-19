@@ -11,7 +11,7 @@ cloudinary.config({
 
 module.exports.getimage = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, type ,post_short_id } = req.body;
 
     const uploadResponse = await cloudinary.uploader.upload(req.file.path);
 
@@ -21,6 +21,8 @@ module.exports.getimage = async (req, res) => {
       title,
       ImageUrl: uploadResponse.url,
       description,
+      type,
+      post_short_id: post_short_id,
       User_id: req.user,
     });
 
@@ -30,6 +32,7 @@ module.exports.getimage = async (req, res) => {
       title,
       ImageUrl: uploadResponse.url,
       description,
+      post_short_id: post_short_id,
       User_id: {
         _id: user._id,
         username: user.username,

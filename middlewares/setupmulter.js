@@ -2,6 +2,7 @@ const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
 const path = require("path");
+
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
@@ -13,17 +14,27 @@ const storage = new CloudinaryStorage({
   params: {
     folder: process.env.FOLDER,
   },
+  allowedFormats: ["jpg", "png", "jpeg", "gif", "mp4"], 
 });
-
-const upload = multer({ storage: storage });
 
 function fileFilter(req, file, cb) {
   let extName = file.originalname.split(".").pop().toLowerCase();
-  if (extName === "jpg" || extName === "jpeg" || extName === "png") {
+  console.log(extName);
+  if (
+    extName === "jpg" ||
+    extName === "jpeg" ||
+    extName === "png" ||
+    extName === "mp4"
+  ) {
     return cb(null, true);
   }
   cb(null, false);
 }
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+});
 
 module.exports = {
   upload,

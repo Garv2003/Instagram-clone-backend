@@ -109,20 +109,22 @@ module.exports.getshowpost = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 module.exports.addcomment = async (req, res) => {
   try {
     const comment = await Comment.create({
       text: req.body.text,
       postedby: req.user,
     });
-    console.log(comment);
     await Post.findByIdAndUpdate(req.body.postid, {
       $push: { comments: comment._id },
     });
-
-    res.json({ message: "true" });
+    const comment1 = await Comment.findById(comment._id).populate(
+      "postedby",
+      "name profileImage username"
+    );
+    res.json({ message: "true", comment: comment1 });
   } catch (err) {
+    console.error(err);
     res.json({ message: "false" });
   }
 };
@@ -230,6 +232,17 @@ module.exports.unsavepost = async (req, res) => {
     });
 
     res.json(userResult);
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports.deletecomment = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await Comment.findByIdAndDelete(id);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
   }

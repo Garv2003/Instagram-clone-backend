@@ -35,7 +35,6 @@ module.exports.postregister = async (req, res) => {
 
 module.exports.postlogin = (req, res) => {
   const { username, password } = req.body;
-  console.log(req.body);
   if (!username || !password) {
     return res.send({ error: "Please enter all the fields" });
   }
