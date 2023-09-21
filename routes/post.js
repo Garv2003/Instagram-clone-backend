@@ -17,7 +17,7 @@ router.delete(
   fetchuser,
   controller.postdeleteprofilepost
 );
-router.delete("/deletecomment/:id", fetchuser, controller.deletecomment); 
+router.delete("/deletecomment", fetchuser, controller.deletecomment); 
 
 router.post("/updatepost/:id", fetchuser, controller.updatepost);
 

@@ -238,10 +238,11 @@ module.exports.unsavepost = async (req, res) => {
 };
 
 module.exports.deletecomment = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const result = await Comment.findByIdAndDelete(id);
+    const result = await Comment.findByIdAndDelete(req.query.commentid);
+    await Post.findByIdAndUpdate(req.query.postid, {
+      $pull: { comments: req.query.commentid },
+    });
     res.json(result);
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
