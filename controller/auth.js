@@ -24,12 +24,12 @@ module.exports.postregister = async (req, res) => {
       bcrypt.hash(password, salt, async function (err, hash) {
         newUser.password = hash;
         newUser.save();
-        res.send([{ message: "Registration successful" }, newUser]);
+        res.send({ message: "Registration successful" ,success:true});
       });
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error registering user" });
+    res.status(500).json({ message: "Error registering user" ,success:false});
   }
 };
 
@@ -46,7 +46,7 @@ module.exports.postlogin = (req, res) => {
       }
       bcrypt.compare(password, user.password).then(function (result) {
         if (result) {
-          const token = jwt.sign({ _id: user._id }, Jwt_secret);
+          const token = jwt.sign({ _id: user._id }, Jwt_secret,{  });
           const { _id, name, email, userName } = user;
           res.status(200).json({
             token,
@@ -64,7 +64,6 @@ module.exports.postlogin = (req, res) => {
 
 module.exports.getuser = (req, res) => {
   const token = req.header("Authorization");
-  if (!token) return res.send("false");
   try {
     const verified = jwt.verify(token, Jwt_secret);
     if (!verified) return res.send(false);
