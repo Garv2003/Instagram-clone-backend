@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controller/post");
 const controllerimage = require("../controller/image");
-const { upload } = require("../middlewares/setupmulter");
+const upload = require("../middlewares/setupmulter");
 const fetchuser = require("../middlewares/fetchuser");
 const path = require("path");
 

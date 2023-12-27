@@ -34,10 +34,7 @@ app.use("/post", postrouter);
 app.use("/message", messageouter);
 
 mongoose
-  .connect(process.env.MONGODB_URL,{
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGODB_URL)
   .then(() => {
     app.listen(PORT, () => {
       console.log(PORT);
