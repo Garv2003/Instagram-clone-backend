@@ -1,22 +1,12 @@
 const Posts = require("../models/post");
 const Users = require("../models/user");
 const cloudinary = require("cloudinary").v2;
-const path = require("path");
-const multer = require("multer");
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 module.exports.getimage = async (req, res) => {
   try {
     if (!req.file)
       return res.status(400).json({ message: "Please upload a file" });
+
     const { title, description, type } = req.body;
     const fileBuffer = req.file.buffer;
     const filetype = req.file.mimetype.split("/")[1];
@@ -64,6 +54,7 @@ module.exports.getimage = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error);
     res
       .status(500)
       .json({ message: "Error processing file", error: error.message });
