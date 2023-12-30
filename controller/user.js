@@ -73,7 +73,7 @@ module.exports.userunfollow = (req, res) => {
 
 module.exports.getuser = (req, res, next) => {
   if (!req.query.user) {
-    res.send("Input is empty");
+    return res.status(404).json([]);
   }
   Users.find({ username: { $regex: req.query.user, $options: "i" } })
     .then((user) => {

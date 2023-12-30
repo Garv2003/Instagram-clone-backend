@@ -63,7 +63,6 @@ module.exports.getimage = async (req, res) => {
 
 module.exports.postprofile = async (req, res, next) => {
   try {
-    console.log(req.file);
     if (!req.file)
       return res.status(400).json({ message: "Please upload a file" });
 
