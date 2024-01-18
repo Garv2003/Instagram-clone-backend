@@ -7,7 +7,7 @@ module.exports.getexplore = (req, res) => {
   Post.find({
     $and: [{ User_id: { $ne: req.user } }, { type: "image" }],
   })
-    .select("ImageUrl likes comments")
+    .select("ImageUrl likes comments type")
     .sort({ createdAt: -1 })
     .then((posts) => {
       res.status(200).json(posts);
