@@ -38,11 +38,11 @@ module.exports.userfollow = async (req, res) => {
   try {
     const updatedFollowedUser = await Users.findByIdAndUpdate(
       req.body.followId,
-      { $push: { followers: req.user._id } },
+      { $push: { followers: req.user } },
       { new: true }
     );
     const updatedCurrentUser = await Users.findByIdAndUpdate(
-      req.user._id,
+      req.user,
       { $push: { following: req.body.followId } },
       { new: true }
     );
@@ -75,7 +75,7 @@ module.exports.userunfollow = async (req, res) => {
       { new: true }
     );
     const updatedCurrentUser = await Users.findByIdAndUpdate(
-      req.user._id,
+      req.user,
       { $pull: { following: req.body.followId } },
       { new: true }
     );
