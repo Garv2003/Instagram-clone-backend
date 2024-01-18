@@ -10,6 +10,7 @@ router.get("/explore",fetchuser,controller.getexplore);
 router.get("/showpost/:id", fetchuser, controller.getshowpost);
 router.get("/profile", fetchuser, controller.getprofile);
 router.get("/", fetchuser, controller.gethome);
+router.get("/reels", fetchuser, controller.getReels);
 
 router.delete("/deletepost/:id", fetchuser, controller.getdeletepost);
 router.delete(

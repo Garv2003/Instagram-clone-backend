@@ -7,9 +7,8 @@ module.exports.getimage = async (req, res) => {
     if (!req.file)
       return res.status(400).json({ message: "Please upload a file" });
 
-    const { title, description, type } = req.body;
+    const { caption, location, type } = req.body;
     const fileBuffer = req.file.buffer;
-    const filetype = req.file.mimetype.split("/")[1];
     const post_short_id = Math.random().toString(36).substring(2, 9);
 
     if (!fileBuffer) {
@@ -33,10 +32,10 @@ module.exports.getimage = async (req, res) => {
     const user = await Users.findOne({ _id: req.user });
 
     const newpost = new Posts({
-      title,
+      caption,
       ImageUrl: uploadResponse.url,
-      description,
-      filetype,
+      location,
+      type,
       post_short_id: post_short_id,
       User_id: req.user,
     });
@@ -44,14 +43,9 @@ module.exports.getimage = async (req, res) => {
     await newpost.save();
 
     res.status(200).json({
-      title,
-      ImageUrl: uploadResponse.url,
-      description,
-      post_short_id: post_short_id,
-      User_id: {
-        _id: user._id,
-        username: user.username,
-      },
+      message: "Post created successfully",
+      post: newpost,
+      user: user,
     });
   } catch (error) {
     console.error(error);

@@ -1,14 +1,38 @@
 const Post = require("../models/post");
 const User = require("../models/user");
 const Comment = require("../models/comment");
-const router = require("../routes/post");
+const Notification = require("../models/notification");
 
 module.exports.getexplore = (req, res) => {
-  Post.find({ User_id: { $ne: req.user } })
-    .populate("User_id")
+  Post.find({
+    $and: [{ User_id: { $ne: req.user } }, { type: "image" }],
+  })
+    .select("ImageUrl likes comments")
     .sort({ createdAt: -1 })
     .then((posts) => {
-      res.json(posts);
+      res.status(200).json(posts);
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Internal server error" });
+    });
+};
+
+module.exports.getReels = async (req, res) => {
+  const { skip, limit } = req.query;
+
+  const total = await Post.find({
+    $and: [{ User_id: { $ne: req.user } }, { type: "video" }],
+  }).countDocuments();
+
+  await Post.find({
+    $and: [{ User_id: { $ne: req.user } }, { type: "video" }],
+  })
+    // .limit(limit)
+    // .skip(skip)
+    .populate("User_id", "-password -email")
+    .sort({ createdAt: -1 })
+    .then((posts) => {
+      res.json({ posts: posts, total: total });
     })
     .catch((err) => {
       res.status(500).json({ message: "Internal server error" });
@@ -20,12 +44,15 @@ module.exports.gethome = async (req, res) => {
 
   const total = await Post.find({
     User_id: { $ne: req.user },
+    type: "image",
   }).countDocuments();
 
-  await Post.find({ User_id: { $ne: req.user } })
+  await Post.find({
+    $and: [{ User_id: { $ne: req.user } }, { type: "image" }],
+  })
     .limit(limit)
     .skip(skip)
-    .populate("User_id")
+    .populate("User_id", "-password -email")
     .sort({ createdAt: -1 })
     .then((posts) => {
       res.json({ posts: posts, total: total });
@@ -37,11 +64,21 @@ module.exports.gethome = async (req, res) => {
 
 module.exports.getprofile = async (req, res) => {
   try {
-    const user = await User.findById(req.user).populate("savedpost");
-    const post = await Post.find({ User_id: req.user });
-    res.json([user, post]);
+    const user = await User.findById(req.user)
+      .populate("savedpost")
+      .select(
+        "-password -email -followers -following -name -username -profileImage -createdAt -updatedAt -__v"
+      );
+    const post = await Post.find({
+      $and: [{ User_id: req.user }, { type: "image" }],
+    }).select("-User_id");
+    const reels = await Post.find({
+      $and: [{ User_id: req.user }, { type: "video" }],
+    }).select("-User_id");
+
+    res.json([user, post, reels]);
   } catch (err) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -122,6 +159,20 @@ module.exports.addcomment = async (req, res) => {
       "postedby",
       "name profileImage username"
     );
+    const notification = new Notification({
+      user: req.user,
+      post: req.body.postid,
+      type: "comment",
+    });
+
+    const savedNotification = await notification.save();
+
+    await User.findByIdAndUpdate(
+      req.body.postedby,
+      { $push: { notifications: savedNotification._id } },
+      { new: true }
+    );
+
     res.json({ message: "true", comment: comment1 });
   } catch (err) {
     console.error(err);
@@ -181,6 +232,22 @@ module.exports.postlike = async (req, res) => {
       $push: { likes: req.user },
     });
 
+    if (result.User_id !== req.user) {
+      const notification = new Notification({
+        user: req.user,
+        post: postid,
+        type: "like",
+      });
+
+      const savedNotification = await notification.save();
+
+      await User.findByIdAndUpdate(
+        result.User_id,
+        { $push: { notifications: savedNotification._id } },
+        { new: true }
+      );
+    }
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
@@ -194,6 +261,20 @@ module.exports.postunlike = async (req, res) => {
     const result = await Post.findByIdAndUpdate(postid, {
       $pull: { likes: req.user },
     });
+
+    if (result.User_id !== req.user) {
+      const notification = await Notification.findOneAndDelete({
+        user: req.user,
+        post: postid,
+        type: "like",
+      });
+
+      await User.findByIdAndUpdate(
+        result.User_id,
+        { $pull: { notifications: notification._id } },
+        { new: true }
+      );
+    }
 
     res.json(result);
   } catch (err) {
@@ -243,6 +324,18 @@ module.exports.deletecomment = async (req, res) => {
     await Post.findByIdAndUpdate(req.query.postid, {
       $pull: { comments: req.query.commentid },
     });
+    const notification = await Notification.findOneAndDelete({
+      user: req.user,
+      post: req.query.postid,
+      type: "comment",
+    });
+    if (notification) {
+      await User.findByIdAndUpdate(
+        result.postedby,
+        { $pull: { notifications: notification._id } },
+        { new: true }
+      );
+    }
     res.json(result);
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });

@@ -5,9 +5,10 @@ const fetchuser = require("../middlewares/fetchuser");
 
 router.get("/suggestion", fetchuser, controller.getsuggestion);
 router.get("/showprofile/:id", controller.showprofile);
+router.get("/search", fetchuser, controller.getuser);
+router.get("/notifications", fetchuser, controller.getNotification);
 
 router.put("/follow", fetchuser, controller.userfollow);
 router.put("/unfollow", fetchuser, controller.userunfollow);
-router.get("/search", controller.getuser);
 
 module.exports = router;

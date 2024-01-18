@@ -74,14 +74,14 @@ module.exports.getuser = (req, res) => {
     const verified = jwt.verify(token, Jwt_secret);
     if (!verified) return res.send(false);
     Users.findById(verified._id)
-      .populate("followers", "_id name username")
-      .populate("following", "_id name username")
+      .populate("followers", "_id name username profileImage")
+      .populate("following", "_id name username profileImage")
       .populate("savedpost", "_id name username profileImage")
       .select("-password")
       .then((user) => {
         res.send(user);
       });
   } catch (err) {
-    res.send(false);
+    res.send({ error: false });
   }
 };
