@@ -21,13 +21,14 @@ const authrouter = require("./routes/auth");
 const userrouter = require("./routes/user");
 const messageouter = require("./routes/message");
 
-app.get("/",(req,res)=>{
-  try{
+app.get("/", (req, res) => {
+  try {
     res.send("for testing purpose");
-  }catch(err){
+  } catch (err) {
     console.log(err);
   }
-})
+});
+
 app.use("/auth", authrouter);
 app.use("/user", userrouter);
 app.use("/post", postrouter);

@@ -1,6 +1,5 @@
 const cloudinary = require("cloudinary").v2;
 // const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const multer = require("multer");
 const path = require("path");
 
 cloudinary.config({
@@ -14,7 +13,7 @@ cloudinary.config({
 //   params: {
 //     folder: process.env.FOLDER,
 //   },
-//   allowedFormats: ["jpg", "png", "jpeg", "gif", "mp4"], 
+//   allowedFormats: ["jpg", "png", "jpeg", "gif", "mp4"],
 // });
 
 // function fileFilter(req, file, cb) {
@@ -35,7 +34,7 @@ cloudinary.config({
 //   storage: storage,
 //   fileFilter: fileFilter,
 // });
-
+const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
