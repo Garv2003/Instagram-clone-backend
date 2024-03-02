@@ -2,6 +2,10 @@ const Posts = require("../models/post");
 const Users = require("../models/user");
 const cloudinary = require("cloudinary").v2;
 
+// get buffer from file
+// convert buffer to datauri (base64)
+// upload datauri to cloudinary
+
 module.exports.getimage = async (req, res) => {
   try {
     if (!req.file)

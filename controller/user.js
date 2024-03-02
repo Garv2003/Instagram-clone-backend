@@ -34,62 +34,47 @@ module.exports.showprofile = async (req, res) => {
   }
 };
 
-module.exports.userfollow = async (req, res) => {
+module.exports.togglefollow = async (req, res) => {
   try {
-    const updatedFollowedUser = await Users.findByIdAndUpdate(
-      req.body.followId,
-      { $push: { followers: req.user } },
-      { new: true }
-    );
-    const updatedCurrentUser = await Users.findByIdAndUpdate(
-      req.user,
-      { $push: { following: req.body.followId } },
-      { new: true }
-    );
-    const notification = new Notification({
-      user: req.user,
-      type: "follow",
-    });
-    const savedNotification = await notification.save();
-    await Users.findByIdAndUpdate(
-      req.body.followId,
-      { $push: { notifications: savedNotification._id } },
-      { new: true }
-    );
+    const updatedFollowedUser = await Users.findById(req.body.followId);
 
-    res.status(200).json({
-      followedUser: updatedFollowedUser,
-      currentUser: updatedCurrentUser,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-module.exports.userunfollow = async (req, res) => {
-  try {
-    const updatedFollowedUser = await Users.findByIdAndUpdate(
-      req.body.followId,
-      { $pull: { followers: req.user } },
-      { new: true }
-    );
-    const updatedCurrentUser = await Users.findByIdAndUpdate(
-      req.user,
-      { $pull: { following: req.body.followId } },
-      { new: true }
-    );
-    const notification = await Notification.findOneAndDelete({
-      user: req.user,
-      type: "follow",
-    });
-
-    if (notification) {
+    if (updatedFollowedUser.followers.includes(req.user)) {
+      updatedFollowedUser.followers.pull(req.user);
+      await updatedFollowedUser.save();
+      const notification = await Notification.findOneAndDelete({
+        user: req.user,
+        type: "follow",
+      });
+      if (notification) {
+        await Users.findByIdAndUpdate(
+          req.body.followId,
+          { $pull: { notifications: notification._id } },
+          { new: true }
+        );
+      }
+    } else {
+      updatedFollowedUser.followers.push(req.user);
+      await updatedFollowedUser.save();
+      const notification = new Notification({
+        user: req.user,
+        type: "follow",
+      });
+      const savedNotification = await notification.save();
       await Users.findByIdAndUpdate(
         req.body.followId,
-        { $pull: { notifications: notification._id } },
+        { $push: { notifications: savedNotification._id } },
         { new: true }
       );
+    }
+
+    const updatedCurrentUser = await Users.findById(req.user);
+
+    if (updatedCurrentUser.following.includes(req.body.followId)) {
+      updatedCurrentUser.following.pull(req.body.followId);
+      await updatedCurrentUser.save();
+    } else {
+      updatedCurrentUser.following.push(req.body.followId);
+      await updatedCurrentUser.save();
     }
 
     res.status(200).json({
@@ -150,10 +135,7 @@ module.exports.getNotification = async (req, res, next) => {
     user.notifications = user.notifications.filter(
       (id) => !deletedNotificationIds.includes(id)
     );
-
     await user.save();
-
-    console.log(user.notifications);
     res.status(200).json(user);
   } catch (err) {
     console.error(err);

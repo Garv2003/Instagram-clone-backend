@@ -8,7 +8,6 @@ router.get("/showprofile/:id", controller.showprofile);
 router.get("/search", fetchuser, controller.getuser);
 router.get("/notifications", fetchuser, controller.getNotification);
 
-router.put("/follow", fetchuser, controller.userfollow);
-router.put("/unfollow", fetchuser, controller.userunfollow);
+router.put("/togglefollow", fetchuser, controller.togglefollow);
 
 module.exports = router;

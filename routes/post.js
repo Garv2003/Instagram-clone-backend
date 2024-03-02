@@ -4,9 +4,8 @@ const controller = require("../controller/post");
 const controllerimage = require("../controller/image");
 const upload = require("../middlewares/setupmulter");
 const fetchuser = require("../middlewares/fetchuser");
-const path = require("path");
 
-router.get("/explore",fetchuser,controller.getexplore);
+router.get("/explore", fetchuser, controller.getexplore);
 router.get("/showpost/:id", fetchuser, controller.getshowpost);
 router.get("/profile", fetchuser, controller.getprofile);
 router.get("/", fetchuser, controller.gethome);
@@ -18,7 +17,8 @@ router.delete(
   fetchuser,
   controller.postdeleteprofilepost
 );
-router.delete("/deletecomment", fetchuser, controller.deletecomment); 
+
+router.delete("/deletecomment", fetchuser, controller.deletecomment);
 
 router.post("/updatepost/:id", fetchuser, controller.updatepost);
 
@@ -37,13 +37,9 @@ router.post(
 );
 
 router.post("/addcomment", fetchuser, controller.addcomment);
-router.put("/like", fetchuser, controller.postlike);
-router.put("/unlike", fetchuser, controller.postunlike);
-router.put("/bookmark", fetchuser, controller.savepost);
-router.put("/unbookmark", fetchuser, controller.unsavepost);
+router.put("/togglelike", fetchuser, controller.togglelike);
+router.put("/togglebookmark", fetchuser, controller.togglesavepost);
 router.put("/commentreply", fetchuser, controller.addreply);
-router.put("/commentlike", fetchuser, controller.commentlike);
-router.put("/commentunlike", fetchuser, controller.commentunlike);
-
+router.put("/commenttogglelike", fetchuser, controller.commenttogglelike);
 
 module.exports = router;

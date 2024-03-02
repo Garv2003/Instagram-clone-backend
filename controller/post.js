@@ -87,6 +87,8 @@ module.exports.getdeletepost = async (req, res) => {
   try {
     const result = await Post.deleteOne({ _id: id });
 
+    const commit = await Comment.deleteMany({ postid: id });
+
     if (result.deletedCount === 1) {
       res.json({ message: "true" });
     } else {
@@ -198,71 +200,43 @@ module.exports.addreply = async (req, res) => {
   }
 };
 
-module.exports.commentlike = async (req, res) => {
+module.exports.commenttogglelike = async (req, res) => {
   const { commentid } = req.body;
-  Comment.findByIdAndUpdate(commentid, {
-    $push: { likes: req.user },
-  })
-    .then((result) => {
-      res.json(result);
-    })
-    .catch((err) => {
-      res.json({ message: "false" });
-    });
-};
-
-module.exports.commentunlike = async (req, res) => {
-  const { commentid } = req.body;
-  Comment.findByIdAndUpdate(commentid, {
-    $pull: { likes: req.user },
-  })
-    .then((result) => {
-      res.json(result);
-    })
-    .catch((err) => {
-      res.json({ message: "false" });
-    });
-};
-
-module.exports.postlike = async (req, res) => {
-  const { postid } = req.body;
 
   try {
-    const result = await Post.findByIdAndUpdate(postid, {
-      $push: { likes: req.user },
-    });
-
-    if (result.User_id !== req.user) {
-      const notification = new Notification({
-        user: req.user,
-        post: postid,
-        type: "like",
-      });
-
-      const savedNotification = await notification.save();
-
-      await User.findByIdAndUpdate(
-        result.User_id,
-        { $push: { notifications: savedNotification._id } },
-        { new: true }
-      );
+    if (commentid === undefined) {
+      return res.json({ message: "false" });
     }
 
-    res.json(result);
+    const result = await Comment.findById(commentid);
+
+    if (result.likes.includes(req.user)) {
+      const result = await Comment.findByIdAndUpdate(commentid, {
+        $pull: { likes: req.user },
+      });
+      return res.json(result);
+    } else {
+      const result = await Comment.findByIdAndUpdate(commentid, {
+        $push: { likes: req.user },
+      });
+      return res.json(result);
+    }
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-module.exports.postunlike = async (req, res) => {
+module.exports.togglelike = async (req, res) => {
   const { postid } = req.body;
 
   try {
-    const result = await Post.findByIdAndUpdate(postid, {
-      $pull: { likes: req.user },
-    });
+    const result = await Post.findById(postid);
 
-    if (result.User_id !== req.user) {
+    if (result.likes.includes(req.user)) {
+      const result = await Post.findByIdAndUpdate(postid, {
+        $pull: { likes: req.user },
+      });
+
       const notification = await Notification.findOneAndDelete({
         user: req.user,
         post: postid,
@@ -274,45 +248,63 @@ module.exports.postunlike = async (req, res) => {
         { $pull: { notifications: notification._id } },
         { new: true }
       );
+
+      return res.json(result);
+    } else {
+      const result = await Post.findByIdAndUpdate(postid, {
+        $push: { likes: req.user },
+      });
+
+      if (result.User_id !== req.user) {
+        const notification = new Notification({
+          user: req.user,
+          post: postid,
+          type: "like",
+        });
+
+        const savedNotification = await notification.save();
+
+        await User.findByIdAndUpdate(
+          result.User_id,
+          { $push: { notifications: savedNotification._id } },
+          { new: true }
+        );
+      }
+
+      return res.json(result);
     }
-
-    res.json(result);
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-module.exports.savepost = async (req, res) => {
+module.exports.togglesavepost = async (req, res) => {
   const { postid } = req.body;
 
   try {
-    const postResult = await Post.findByIdAndUpdate(postid, {
-      $push: { bookmarks: req.user },
-    });
+    const postResult = await Post.findById(postid);
 
-    const userResult = await User.findByIdAndUpdate(req.user, {
-      $push: { savedpost: postid },
-    });
+    if (postResult.bookmarks.includes(req.user)) {
+      const postResult = await Post.findByIdAndUpdate(postid, {
+        $pull: { bookmarks: req.user },
+      });
 
-    res.json(userResult);
-  } catch (err) {
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
+      const userResult = await User.findByIdAndUpdate(req.user, {
+        $pull: { savedpost: postid },
+      });
 
-module.exports.unsavepost = async (req, res) => {
-  const { postid } = req.body;
+      res.json(userResult);
+    } else {
+      const postResult = await Post.findByIdAndUpdate(postid, {
+        $push: { bookmarks: req.user },
+      });
 
-  try {
-    const postResult = await Post.findByIdAndUpdate(postid, {
-      $pull: { bookmarks: req.user },
-    });
+      const userResult = await User.findByIdAndUpdate(req.user, {
+        $push: { savedpost: postid },
+      });
 
-    const userResult = await User.findByIdAndUpdate(req.user, {
-      $pull: { savedpost: postid },
-    });
-
-    res.json(userResult);
+      res.json(userResult);
+    }
   } catch (err) {
     res.status(500).json({ message: "Internal server error" });
   }
